@@ -9,6 +9,7 @@ using namespace output;
 /*%option yyleng*/
 %option yylineno
 %option noyywrap
+%option yytext
 
 whitespace  ([ \n\t\r])
 

@@ -1,6 +1,8 @@
 {
     "files.associations": {
         "xstring": "cpp",
-        "vector": "cpp"
-    }
+        "vector": "cpp",
+        "string": "cpp"
+    },
+    "cmake.sourceDirectory": "C:/Users/sahar/Desktop/semester 7/compilation/hw3"
 }
