@@ -1,6 +1,6 @@
 #include <vector>
 #include "SymbolTable.hpp"
-#include "Symbol.hpp"
+
 using namespace std;
 
 class TableStack{

@@ -1,0 +1,15 @@
+%nonassoc INT 
+%nonassoc BYTE 
+%nonassoc B 
+%nonassoc BOOL 
+%nonassoc TRUE 
+%nonassoc FALSE 
+%nonassoc RETURN 
+%nonassoc IF 
+%nonassoc WHILE 
+%nonassoc BREAK 
+%nonassoc CONTINUE 
+%nonassoc SC 
+%nonassoc ID 
+%nonassoc NUM 
+%nonassoc STRING 

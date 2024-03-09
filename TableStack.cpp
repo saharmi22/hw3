@@ -12,7 +12,7 @@ void TableStack::addTableToStack(){
 }
 
 SymbolTable TableStack::getLastTable(){
-    this->table_stack.back();
+    return this->table_stack.back();
 }
 
 void TableStack::popTableFromStack()

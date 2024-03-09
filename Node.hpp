@@ -2,17 +2,20 @@
 #include "TableStack.hpp"
 using namespace std;
 
+#define YYSTYPE Node*
 
 class Node{  
+public:
     string name;
 
-    public:
-        Node(string n);  
-        Node();
-        string getName();
+    
+    Node(string n);  
+    Node();
+    string getName();
+    virtual ~Node() = default;
 };
 
-class Program : Node{
+class Program : public Node{
     Statements* s;
 
     public:
@@ -20,7 +23,7 @@ class Program : Node{
 };
 
 
-class Statements : Node{
+class Statements : public Node{
     Statements* statements;
     Statement* statement;
 
@@ -31,7 +34,7 @@ class Statements : Node{
 };
 
 
-class Statement : Node{
+class Statement : public Node{
     Statements* statements;
     Type* type;
     Node* node;
@@ -57,7 +60,7 @@ class Statement : Node{
 };
 
 
-class Call : Node{
+class Call :  public Node{
     Node* id;
     Expression* exp;
     string ret_type;
@@ -66,7 +69,7 @@ class Call : Node{
         Call(Node *id, Expression *exp);
 };
 
-class Type : Node{
+class Type : public Node{
     string type;
 
     public:
@@ -75,7 +78,8 @@ class Type : Node{
 
 };
 
-class Expression : Node{
+class Expression : public Node{
+    public:
     Expression* exp1;
     Expression* exp2;
     Node* id;
@@ -86,15 +90,13 @@ class Expression : Node{
     string exp_type;
     bool is_in_loop;
 
-    public:
-        Expression(Expression* exp,  bool is_parens);
-        Expression(Expression* exp1, Expression* exp2, string middle_word);
+    
+        Expression(Node* n_exp,  bool is_parens);
+        Expression(Node* n_exp1, Node* n_exp2, string middle_word);
         Expression(Node* id);
-        Expression(Call* c);
+        Expression(Node* n_c);
         Expression(int num, bool is_byte);
-        //byte num
-        Expression(Type* type);
-        Expression(Type* type, Expression* exp);
+        Expression(Node* n_type, Node* n_exp);
         Expression(string string_true_false);
         string getExpType();
 };

@@ -29,47 +29,49 @@ TableStack stack = TableStack();
 
 %%
 
-Program: Statments {$$ = Program(&($1));}
+Program: Statments                                                          {$$ = new Program(&($1));}
         
-Statments: Statment {$$ = Statements(&($1));}
-        | Statments Statment {$$ = Statements(&($2), &($1));}
+Statments: Statment                                                         {$$ = new Statements(&($1));}
+        | Statments Statment                                                {$$ = new Statements(&($2), &($1));}
         
-Statment: LBRACE {stack.addTableToStack()} Statments RBRACE {$$ = Statement(&($1));}
+Statment: LBRACE {stack.addTableToStack()} Statments RBRACE                 {$$ = new Statement(&($1));}
         | Type ID SC {$$ = Statement(&($1), $2);}
-        | Type ID ASSIGN Exp SC {$$ = Statement(&($1), &($2), &($4));}
-        | ID ASSIGN Exp SC {$$ = Statement(&($1), &($3));}
-        | Call SC {$$ = Statement(&($1));}
-        | RETURN SC {$$ = Statement("return");}
-        | IF LPAREN Exp RPAREN {stack.addTableToStack();} Statment {$$ = Statement(&($3), &($5), true);}
-        | IF LPAREN Exp RPAREN {stack.addTableToStack();} Statment ELSE {stack.addTableToStack();} Statment {$$ = Statement(&($3), &($5), &($7));}
-        | WHILE LPAREN Exp RPAREN {stack.addTableToStack();} Statment {$$ = Statement(&($3), &($5), false);}
-        | BREAK SC {$$ = Statement("BREAK");}
-        | CONTINUE SC {$$ = Statement("CONTINUE");}
-        
-Call: ID LPAREN Exp RPAREN {$$ = Call(&($3));};
+        | Type ID ASSIGN Exp SC                                             {$$ = new Statement(&($1), &($2), &($4));}
+        | ID ASSIGN Exp SC                                                  {$$ = new Statement(&($1), &($3));}
+        | Call SC                                                           {$$ = new Statement(&($1));}
+        | RETURN SC                                                         {$$ = new Statement("return");}
+        | IF LPAREN Exp RPAREN AddTable Statment                            {$$ = new Statement(&($3), &($5), true);}
+        | IF LPAREN Exp RPAREN AddTable Statment ELSE AddTable Statment     {$$ = new Statement(&($3), &($5), &($7));}
+        | WHILE LPAREN Exp RPAREN AddTable Statment                         {$$ = new Statement(&($3), &($5), false);}
+        | BREAK SC                                                          {$$ = new Statement("BREAK");}
+        | CONTINUE SC                                                       {$$ = new Statement("CONTINUE");}
 
-Type: INT {$$ = Type("INT");}
-    | BYTE {$$ = Type("BYTE");}
-    | BOOL  {$$ = Type("BOOL");}
+AddTable:                                                                   {stack.addTableToStack();} 
+
+Call: ID LPAREN Exp RPAREN                                                  {$$ = new Call(&($3));};
+
+Type: INT                                                                   {$$ = new Type("INT");}
+    | BYTE                                                                  {$$ = new Type("BYTE");}
+    | BOOL                                                                  {$$ = new Type("BOOL");}
     
-Exp: LPAREN Exp RPAREN {$$ = Expression(&($2), true);}
-    | Exp PLUS Exp {$$ = Expression(&($1), &($3), "PLUS");}
-    | Exp MINUS Exp {$$ = Expression(&($1), &($3), "MINUS");}
-    | Exp MULT Exp {$$ = Expression(&($1), &($3), "MULT");}
-    | Exp DIV Exp {$$ = Expression(&($1), &($3), "DIV");}
-    | ID {$$ = Expression(&($1));}
-    | Call {$$ = Expression(&($1));}
-    | NUM {$$ = Expression(atoi(yytext));} //how can i get the val?? check tutorial
-    | NUM B {$$ = Expression(atoi(yytext.pop_back()), true);}
-    | STRING {$$ = Expression("STRING");}
-    | TRUE {$$ = Expression("TRUE");}
-    | FALSE {$$ = Expression("FALSE");}
-    | NOT Exp {$$ = Expression(&($2), false);}
-    | Exp AND Exp {$$ = Expression(&($1), &($3), "AND");}
-    | Exp OR Exp {$$ = Expression(&($1), &($3), "OR");}
-    | Exp REL Exp {$$ = Expression(&($1), &($3), "REL");}
-    | Exp EQ Exp {$$ = Expression(&($1), &($3), "EQ");}
-    | LPAREN Type RPAREN Exp {$$ = Expression(&($2), &($4));}
+Exp: LPAREN Exp RPAREN                                                      {$$ = new Expression($2, true);}
+    | Exp PLUS Exp                                                          {$$ = new Expression($1, $3, "PLUS");}
+    | Exp MINUS Exp                                                         {$$ = new Expression($1, $3, "MINUS");}
+    | Exp MULT Exp                                                          {$$ = new Expression($1, $3, "MULT");}
+    | Exp DIV Exp                                                           {$$ = new Expression($1, $3, "DIV");}
+    | ID                                                                    {$$ = new Expression($1);}
+    | Call                                                                  {$$ = new Expression($1);}
+    | NUM                                                                   {$$ = new Expression(atoi(yytext));} 
+    | NUM B                                                                 {$$ = new Expression(atoi(yytext.pop_back()), true);}
+    | STRING                                                                {$$ = new Expression("STRING");}
+    | TRUE                                                                  {$$ = new Expression("TRUE");}
+    | FALSE                                                                 {$$ = new Expression("FALSE");}
+    | NOT Exp                                                               {$$ = new Expression($2, false);}
+    | Exp AND Exp                                                           {$$ = new Expression($1, $3, "AND");}
+    | Exp OR Exp                                                            {$$ = new Expression($1, $3, "OR");}
+    | Exp REL Exp                                                           {$$ = new Expression($1, $3, "REL");}
+    | Exp EQ Exp                                                            {$$ = new Expression($1, $3, "EQ");}
+    | LPAREN Type RPAREN Exp                                                {$$ = new Expression($2, $4);}
     
 
 %%

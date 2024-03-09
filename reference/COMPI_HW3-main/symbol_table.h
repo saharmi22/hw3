@@ -4,7 +4,9 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include "Symbol.hpp"
 #define DEBUG false
+
 
 using std::string;
 using std::vector;

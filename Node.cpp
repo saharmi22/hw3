@@ -224,7 +224,8 @@ string Type::getType()
 
 // Expression Implementation
 
-Expression::Expression(Expression* exp, bool is_parens){
+Expression::Expression(Node* n_exp, bool is_parens){
+    Expression* exp = dynamic_cast<Expression*>(n_exp);
     string rule = "LPAREN Exp RPAREN";
     if (!is_parens){
         rule = "NOT Exp";
@@ -237,7 +238,9 @@ Expression::Expression(Expression* exp, bool is_parens){
     this->exp_type = exp->getExpType();
 }
 
-Expression::Expression(Expression* exp1, Expression* exp2, string middle_word){
+Expression::Expression(Node* n_exp1, Node* n_exp2, string middle_word){
+    Expression* exp1 = dynamic_cast<Expression*>(n_exp1);
+    Expression* exp2 = dynamic_cast<Expression*>(n_exp2);
     this->exp1 = exp1;
     this->exp2 = exp2;
     if (middle_word == "MINUS" || middle_word == "PLUS" || middle_word == "MULT" || middle_word == "DIV"){
@@ -287,7 +290,8 @@ Expression::Expression(Node* id){
     }
 }
 
-Expression::Expression(Call* c){
+Expression::Expression(Node* n_c){
+    Call* c = dynamic_cast<Call*>(n_c);
     string rule = "Call";
     this->call = c;
 }
@@ -307,7 +311,9 @@ Expression::Expression(int num, bool is_byte){
     this->num = num;
 }
 
-Expression::Expression(Type* type, Expression* exp){
+Expression::Expression(Node* n_type, Node* n_exp){
+    Type* type = dynamic_cast<Type*>(n_type);
+    Expression* exp = dynamic_cast<Expression*>(n_exp);
     string rule = "LPAREN Type RPAREN Exp";
     this->type = type;
     this->exp1 = exp;

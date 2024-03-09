@@ -1,5 +1,6 @@
 #include <vector>
 #include "Symbol.hpp"
+
 using namespace std;
 
 class SymbolTable{
