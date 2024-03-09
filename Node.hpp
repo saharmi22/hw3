@@ -2,24 +2,28 @@
 #include "TableStack.hpp"
 using namespace std;
 
-#define YYSTYPE Node*
+class Call;
+class Program;
+class Statement;
+class Statements;
+class Expression;
+class Type;
+class Node;
 
 class Node{  
-public:
     string name;
 
-    
-    Node(string n);  
-    Node();
-    string getName();
-    virtual ~Node() = default;
+    public:
+        Node(string n);  
+        Node();
+        string getName();
 };
 
 class Program : public Node{
     Statements* s;
 
     public:
-        Program(Statements* s);
+        Program(Node* s);
 };
 
 
@@ -29,8 +33,8 @@ class Statements : public Node{
 
 
     public:
-        Statements(Statement* s1);
-        Statements(Statement* s2, Statements* s1);
+        Statements(Node* s1);
+        Statements(Node* s2, Node* s1);
 };
 
 
@@ -48,25 +52,22 @@ class Statement : public Node{
         bool is_in_loop;
         string loop_statement;
         Statement(string type);
-        Statement(Statements* s);
-        Statement(Type* t, Node* id);
-        Statement(Type* t, Node* id, Expression* e);
-        Statement(Node* id, Expression* e);
-        Statement(Call* c);
-        Statement(Expression* e, Statement* s, bool is_if);
-        Statement(Expression* e, Statement* s1, Statement* s2);
+        Statement(Node* s);
+        Statement(Node* t_e, Node* id);
+        Statement(Node* t, Node* id, Node* e);
+        Statement(Node* e, Node* s, bool is_if);
         bool checkLoopStatement();
 
 };
 
 
-class Call :  public Node{
+class Call : public Node{
     Node* id;
     Expression* exp;
     string ret_type;
     
     public:
-        Call(Node *id, Expression *exp);
+        Call(Node *id, Node *exp);
 };
 
 class Type : public Node{
@@ -79,7 +80,6 @@ class Type : public Node{
 };
 
 class Expression : public Node{
-    public:
     Expression* exp1;
     Expression* exp2;
     Node* id;
@@ -90,12 +90,12 @@ class Expression : public Node{
     string exp_type;
     bool is_in_loop;
 
-    
+    public:
         Expression(Node* n_exp,  bool is_parens);
         Expression(Node* n_exp1, Node* n_exp2, string middle_word);
-        Expression(Node* id);
         Expression(Node* n_c);
         Expression(int num, bool is_byte);
+        //byte num
         Expression(Node* n_type, Node* n_exp);
         Expression(string string_true_false);
         string getExpType();

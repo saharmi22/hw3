@@ -15,6 +15,7 @@ public:
     Symbol(string type, string name, int offset, bool is_func, vector<Symbol> params);
     string getName();
     string getType();
+    int getOffset();
     bool isFunc();
     vector<Symbol> getFuncParams();
     ~Symbol(){};

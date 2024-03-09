@@ -1,4 +1,6 @@
 #include "SymbolTable.hpp"
+#include "hw3_output.hpp"
+using namespace output;
 
 SymbolTable::SymbolTable(int init_offset){
     this->curr_offset = init_offset;
@@ -42,3 +44,8 @@ bool SymbolTable::symbolExists(string name){
     return false;
 }
 
+void SymbolTable::printSymbols(){
+    for (int i=0; i<this->table.size(); i++){
+        printID(this->table[i].getName(), this->table[i].getOffset(), this->table[i].getType());
+    }
+}

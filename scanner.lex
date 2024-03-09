@@ -1,9 +1,12 @@
 %{
 #include <stdio.h>
 #include <string.h>
-#include "output.hpp"
+#include "Node.hpp"
+#include "hw3_output.hpp"
 #include "parser.tab.hpp"
 using namespace output;
+
+#define YYSTYPE Node*
 %}
 
 /*%option yyleng*/

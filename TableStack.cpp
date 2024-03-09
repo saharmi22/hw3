@@ -47,3 +47,8 @@ Symbol* TableStack::getSymbol(string name){
     }
     return nullptr;
 }
+
+void TableStack::printScope(){
+    SymbolTable t = this->getLastTable();
+    t.printSymbols();
+}

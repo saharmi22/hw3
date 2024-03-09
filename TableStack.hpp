@@ -1,5 +1,6 @@
 #include <vector>
 #include "SymbolTable.hpp"
+#include "hw3_output.hpp"
 
 using namespace std;
 
@@ -11,7 +12,7 @@ class TableStack{
     public:
         TableStack();
 
-        ~TableStack();
+        ~TableStack(){};
 
         void addTableToStack();
 
@@ -20,6 +21,8 @@ class TableStack{
         void popTableFromStack();
 
         void addSymbol(string name, string type, bool is_func, vector<Symbol> params);
+
+        void printScope();
 
         bool symbolExists(string name);
 

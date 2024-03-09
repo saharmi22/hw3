@@ -17,6 +17,8 @@ class SymbolTable{
 
         Symbol* getSymbol(string name);
 
+        void printSymbols();
+
         // void removeSymbol(string name);
 
         ~SymbolTable(){};

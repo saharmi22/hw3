@@ -24,3 +24,7 @@ bool Symbol::isFunc(){
 vector<Symbol> Symbol::getFuncParams(){
     return this->params;
 }
+
+int Symbol::getOffset(){
+    return this->offset;
+}

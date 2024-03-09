@@ -1,5 +1,6 @@
 #include "Node.hpp"
 #include "hw3_output.hpp"
+#include <typeinfo>
 using namespace output;
 
 extern TableStack stack;
@@ -21,54 +22,77 @@ string Node::getName(){
 
 // Statement Implementation
 
-Statement::Statement(Statements* s){
-    string rule = "LBRACE Statments RBRACE";
-    this->statements = s;
-    stack.popTableFromStack();
+Statement::Statement(Node* s){
+    
+    if (typeid(*s) == typeid(Statements)){
+        string rule = "LBRACE Statments RBRACE";
+        this->statements = (Statements*)(s);
+        endScope();
+        stack.printScope();
+        stack.popTableFromStack();
+    }
+
+    else{
+        string rule = "Call SC";
+        this->call = (Call*)(s);
+    }
+    
 }
 
-Statement::Statement(Type* t, Node* id){
-    string rule = "Type ID SC";
-    this->type = t;
-    this->node = id;
-    if (stack.symbolExists(id->getName())){
-        errorDef(yylineno, id->getName());
-        exit(0);
+Statement::Statement(Node* t_e, Node* id){
+    if (typeid(*t_e) == typeid(Type)){
+        string rule = "Type ID SC";
+        this->type = (Type*)(t_e);
+        this->node = id;
+        if (stack.symbolExists(id->getName())){
+            errorDef(yylineno, id->getName());
+            exit(0);
+        }
+        stack.addSymbol(this->type->getType(), id->getName(), false, vector<Symbol>());
     }
-    stack.addSymbol(this->type->getType(), id->getName(), false, vector<Symbol>());
+    else{
+        string rule = "ID ASSIGN Exp SC";
+        this->node = id;
+        this->exp = (Expression*)(t_e);
+        if (!stack.symbolExists(id->getName())){
+            errorUndef(yylineno, id->getName());
+            exit(0);
+        }
+    }
 }
 
-Statement::Statement(Type* t, Node* id, Expression* e){
-    string rule = "Type ID ASSIGN Exp SC";
-    this->type = t;
-    this->node = id;
-    this->exp = e;
-    if (stack.symbolExists(id->getName())){
-        errorDef(yylineno, id->getName());
-        exit(0);
+Statement::Statement(Node* t, Node* id, Node* e){
+    if (typeid(*t) == typeid(Type) && typeid(*id) == typeid(Node)){
+        string rule = "Type ID ASSIGN Exp SC";
+        this->type = (Type*)(t);
+        this->node = id;
+        this->exp = (Expression*)(e);
+        if (stack.symbolExists(id->getName())){
+            errorDef(yylineno, id->getName());
+            exit(0);
+        }
+        if (this->exp->getExpType() != this->type->getType()){
+            if (!(this->type->getType() == "INT" && this->exp->getExpType() == "BYTE")){
+                errorMismatch(yylineno);
+                exit(0);
+            }
+        }
+        stack.addSymbol(this->type->getType(), id->getName(), false, vector<Symbol>());
     }
-    if (this->exp->getExpType() != this->type->getType()){
-        if (!(this->type->getType() == "INT" && this->exp->getExpType() == "BYTE")){
+    else{
+        string rule = "IF LPAREN Exp RPAREN Statment ELSE Statment";
+        this->exp = (Expression*)(e);
+        this->statement1 = (Statement*)(t);
+        this->statement2 = (Statement*)(id);
+        if (this->exp->getExpType() == "BOOL"){
+            stack.popTableFromStack();
+            stack.popTableFromStack();
+        }
+        else{
             errorMismatch(yylineno);
             exit(0);
         }
     }
-    stack.addSymbol(this->type->getType(), id->getName(), false, vector<Symbol>());
-}
-
-Statement::Statement(Node* id, Expression* e){
-    string rule = "ID ASSIGN Exp SC";
-    this->node = id;
-    this->exp = e;
-    if (!stack.symbolExists(id->getName())){
-        errorUndef(yylineno, id->getName());
-        exit(0);
-    }
-}
-
-Statement::Statement(Call* c){
-    string rule = "Call SC";
-    this->call = c;
 }
 
 Statement::Statement(string type){
@@ -87,34 +111,19 @@ Statement::Statement(string type){
     }
 }
 
-Statement::Statement(Expression* e, Statement* s, bool is_if){
+Statement::Statement(Node* e, Node* s, bool is_if){
     string rule = "IF LPAREN Exp RPAREN Statment";
     if (!is_if){
         rule = "WHILE LPAREN Exp RPAREN Statment";
-        s->is_in_loop = true;
+        ((Statement*)(s))->is_in_loop = true;
     }
     else{
-        s->is_in_loop = false;
+        ((Statement*)(s))->is_in_loop = false;
     }
-    s->checkLoopStatement();
-    this->exp = e;
-    this->statement1 = s;
-    if (e->getExpType() == "BOOL"){
-        stack.popTableFromStack();
-    }
-    else{
-        errorMismatch(yylineno);
-        exit(0);
-    }
-}
-
-Statement::Statement(Expression* e, Statement* s1, Statement* s2){
-    string rule = "IF LPAREN Exp RPAREN Statment ELSE Statment";
-    this->exp = e;
-    this->statement1 = s1;
-    this->statement2 = s2;
-    if (e->getExpType() == "BOOL"){
-        stack.popTableFromStack();
+    ((Statement*)(s))->checkLoopStatement();
+    this->exp = (Expression*)e;
+    this->statement1 = ((Statement*)(s));
+    if (((Expression*)e)->getExpType() == "BOOL"){
         stack.popTableFromStack();
     }
     else{
@@ -139,15 +148,15 @@ bool Statement::checkLoopStatement(){
 
 // Statements Implementation
 
-Statements::Statements(Statement* s2, Statements* s1){
-    this->statements = s1;
-    this->statement = s2;
+Statements::Statements(Node* s2, Node* s1){
+    this->statements = (Statements*)s1;
+    this->statement = (Statement*)s2;
     statement->is_in_loop = false;
     statement->checkLoopStatement();
 }
 
-Statements::Statements(Statement* s1){
-    this->statement = s1;
+Statements::Statements(Node* s1){
+    this->statement = (Statement*)s1;
     this->statements = nullptr;
     statement->is_in_loop = false;
     statement->checkLoopStatement();
@@ -155,38 +164,38 @@ Statements::Statements(Statement* s1){
 
 // Program Implementation
 
-Program::Program(Statements* s){
-    this->s = s;
+Program::Program(Node* s){
+    this->s = (Statements*)(s);
     stack.popTableFromStack();
 }
 
 
 // Call Implementation
 
-Call::Call(Node* id, Expression* exp){
+Call::Call(Node* id, Node* exp){
     string rule = "ID LPAREN Exp RPAREN";
     this->id = id;
-    this->exp = exp;
+    this->exp = (Expression*)exp;
     Symbol* s = stack.getSymbol(id->getName());
     if (s){
         if(s->isFunc()){
             if (s->getName() == "print"){
                 this->ret_type = "VOID";
-                if (exp->getExpType() != "STRING"){
+                if (this->exp->getExpType() != "STRING"){
                     errorPrototypeMismatch(yylineno, "print", "STRING");
                     exit(0);
                 }
             }
             else if (s->getName() == "printi"){
                 this->ret_type = "VOID";
-                if (exp->getExpType() != "INT"){
+                if (this->exp->getExpType() != "INT"){
                     errorPrototypeMismatch(yylineno, "printi", "INT");
                     exit(0);
                 }
             }
             else{
                 this->ret_type = "INT";
-                if (exp->getExpType() != "INT"){
+                if (this->exp->getExpType() != "INT"){
                     errorPrototypeMismatch(yylineno, "readi", "INT");
                     exit(0);
                 }
@@ -225,7 +234,7 @@ string Type::getType()
 // Expression Implementation
 
 Expression::Expression(Node* n_exp, bool is_parens){
-    Expression* exp = dynamic_cast<Expression*>(n_exp);
+    Expression* exp = (Expression*)(n_exp);
     string rule = "LPAREN Exp RPAREN";
     if (!is_parens){
         rule = "NOT Exp";
@@ -239,8 +248,8 @@ Expression::Expression(Node* n_exp, bool is_parens){
 }
 
 Expression::Expression(Node* n_exp1, Node* n_exp2, string middle_word){
-    Expression* exp1 = dynamic_cast<Expression*>(n_exp1);
-    Expression* exp2 = dynamic_cast<Expression*>(n_exp2);
+    Expression* exp1 = (Expression*)(n_exp1);
+    Expression* exp2 =(Expression*)(n_exp2);
     this->exp1 = exp1;
     this->exp2 = exp2;
     if (middle_word == "MINUS" || middle_word == "PLUS" || middle_word == "MULT" || middle_word == "DIV"){
@@ -281,19 +290,20 @@ Expression::Expression(Node* n_exp1, Node* n_exp2, string middle_word){
     }
 }
 
-Expression::Expression(Node* id){
-    string rule = "ID";
-    this->id = id;
-    if (stack.symbolExists(id->getName())){
-        errorUndef(yylineno, id->getName());
-        exit(0);
-    }
-}
-
 Expression::Expression(Node* n_c){
-    Call* c = dynamic_cast<Call*>(n_c);
-    string rule = "Call";
-    this->call = c;
+    if (typeid(*n_c) == typeid(Call)){
+        Call* c = (Call*)(n_c);
+        string rule = "Call";
+        this->call = c;
+    }
+    else{
+        string rule = "ID";
+        this->id = n_c;
+        if (stack.symbolExists(n_c->getName())){
+            errorUndef(yylineno, n_c->getName());
+            exit(0);
+        }
+    }
 }
 
 Expression::Expression(int num, bool is_byte){
@@ -312,8 +322,8 @@ Expression::Expression(int num, bool is_byte){
 }
 
 Expression::Expression(Node* n_type, Node* n_exp){
-    Type* type = dynamic_cast<Type*>(n_type);
-    Expression* exp = dynamic_cast<Expression*>(n_exp);
+    Type* type = (Type*)(n_type);
+    Expression* exp = (Expression*)(n_exp);
     string rule = "LPAREN Type RPAREN Exp";
     this->type = type;
     this->exp1 = exp;
