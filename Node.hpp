@@ -16,6 +16,7 @@ class Node{
     public:
         Node(string n);  
         Node();
+        ~Node() = default;
         string getName();
 };
 
@@ -24,6 +25,9 @@ class Program : public Node{
 
     public:
         Program(Node* s);
+        /*~Program(){
+            delete s;
+        }*/
 };
 
 
@@ -35,6 +39,12 @@ class Statements : public Node{
     public:
         Statements(Node* s1);
         Statements(Node* s2, Node* s1);
+        /*~Statements(){
+            delete statement;
+            if (statements){
+                delete statements;
+            }
+        }*/
 };
 
 
@@ -57,6 +67,29 @@ class Statement : public Node{
         Statement(Node* t, Node* id, Node* e);
         Statement(Node* e, Node* s, bool is_if);
         bool checkLoopStatement();
+        /*~Statement(){
+            if (statements){
+                delete statements;
+            }
+            if (type){
+                delete type;
+            }
+            if (node){
+                delete node;
+            }
+            if (exp){
+                delete exp;
+            }
+            if (call){
+                delete call;
+            }
+            if (statement1){
+                delete statement1;
+            }
+            if (statement2){
+                delete statement2;
+            }
+        }*/
 
 };
 
@@ -68,6 +101,10 @@ class Call : public Node{
     
     public:
         Call(Node *id, Node *exp);
+        /*~Call(){
+            delete id;
+            delete exp;
+        }*/
 };
 
 class Type : public Node{
@@ -76,6 +113,7 @@ class Type : public Node{
     public:
         Type(string type);
         string getType();
+        /*~Type(){};*/
 
 };
 
@@ -99,4 +137,21 @@ class Expression : public Node{
         Expression(Node* n_type, Node* n_exp);
         Expression(string string_true_false);
         string getExpType();
+        /*~Expression(){
+            if (exp1){
+                delete exp1;
+            }
+            if (exp2){
+                delete exp2;
+            }
+            if (id){
+                delete id;
+            }
+            if (call){
+                delete call;
+            }
+            if (type){
+                delete type;
+            }
+        }*/
 };

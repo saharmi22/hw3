@@ -84,9 +84,9 @@ int main(){
     vector<Symbol> printi_params = vector<Symbol>();
     print_params.push_back(Symbol("INT", "i", 0, false, vector<Symbol>()));
     stack.addSymbol("printi", "VOID", true, printi_params);
-    vector<Symbol> print_params = vector<Symbol>();
+    vector<Symbol> readi_params = vector<Symbol>();
     print_params.push_back(Symbol("INT", "i", 0, false, vector<Symbol>()));
-    stack.addSymbol("readi", "INT", true, print_params);
+    stack.addSymbol("readi", "INT", true, readi_params);
     return yyparse();
 }
 

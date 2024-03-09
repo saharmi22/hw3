@@ -6,6 +6,8 @@ using namespace output;
 extern TableStack stack;
 extern int yylineno;
 
+#define DEBUG true
+
 // Node Implementation
 
 Node::Node(string n){
@@ -62,7 +64,7 @@ Statement::Statement(Node* t_e, Node* id){
 }
 
 Statement::Statement(Node* t, Node* id, Node* e){
-    if (typeid(*t) == typeid(Type) && typeid(*id) == typeid(Node)){
+    if (typeid(*t) == typeid(Type)){
         string rule = "Type ID ASSIGN Exp SC";
         this->type = (Type*)(t);
         this->node = id;
@@ -70,6 +72,9 @@ Statement::Statement(Node* t, Node* id, Node* e){
         if (stack.symbolExists(id->getName())){
             errorDef(yylineno, id->getName());
             exit(0);
+        }
+        if (DEBUG){
+            printf("identified defenition + assignment");
         }
         if (this->exp->getExpType() != this->type->getType()){
             if (!(this->type->getType() == "INT" && this->exp->getExpType() == "BYTE")){
@@ -80,12 +85,19 @@ Statement::Statement(Node* t, Node* id, Node* e){
         stack.addSymbol(this->type->getType(), id->getName(), false, vector<Symbol>());
     }
     else{
+        if (DEBUG){
+            printf("hi");
+        }
         string rule = "IF LPAREN Exp RPAREN Statment ELSE Statment";
         this->exp = (Expression*)(e);
         this->statement1 = (Statement*)(t);
         this->statement2 = (Statement*)(id);
         if (this->exp->getExpType() == "BOOL"){
-            stack.popTableFromStack();
+            endScope();
+            stack.printScope();
+           stack.popTableFromStack();
+            endScope();
+            stack.printScope();
             stack.popTableFromStack();
         }
         else{
@@ -124,6 +136,8 @@ Statement::Statement(Node* e, Node* s, bool is_if){
     this->exp = (Expression*)e;
     this->statement1 = ((Statement*)(s));
     if (((Expression*)e)->getExpType() == "BOOL"){
+        endScope();
+        stack.printScope();
         stack.popTableFromStack();
     }
     else{
@@ -166,6 +180,8 @@ Statements::Statements(Node* s1){
 
 Program::Program(Node* s){
     this->s = (Statements*)(s);
+    endScope();
+    stack.printScope();
     stack.popTableFromStack();
 }
 
@@ -317,6 +333,9 @@ Expression::Expression(int num, bool is_byte){
         else{
             errorByteTooLarge(yylineno, to_string(num));
         }
+    }
+    if (DEBUG){
+        printf("identified number");
     }
     this->num = num;
 }
